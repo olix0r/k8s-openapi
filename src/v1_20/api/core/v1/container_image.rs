@@ -4,7 +4,12 @@
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct ContainerImage {
     /// Names by which this image is known. e.g. \["k8s.gcr.io/hyperkube:v1.0.7", "dockerhub.io/google_containers/hyperkube:v1.0.7"\]
-    pub names: Vec<String>,
+    ///
+    /// XXX The k8s API marks this field as required, but in practice this field may be `null`.
+    ///
+    /// See https://github.com/kubernetes/kubernetes/issues/100802.
+    pub names: Option<Vec<String>>,
+
 
     /// The size of the image in bytes.
     pub size_bytes: Option<i64>,
@@ -65,7 +70,7 @@ impl<'de> serde::Deserialize<'de> for ContainerImage {
                 }
 
                 Ok(ContainerImage {
-                    names: value_names.ok_or_else(|| serde::de::Error::missing_field("names"))?,
+                    names: value_names,
                     size_bytes: value_size_bytes,
                 })
             }
